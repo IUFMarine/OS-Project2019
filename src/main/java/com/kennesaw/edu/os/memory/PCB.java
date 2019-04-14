@@ -56,7 +56,7 @@ public class PCB
    }
 
 
-   public PCB(int cpuID, String State, int counter, int priority, int startingAddress )
+   public PCB(int cpuID, String Status, int counter, int priority, int startingAddress )
    {
       this.cpuID = cpuID;
       this.Status = Status;
