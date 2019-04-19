@@ -181,7 +181,7 @@ public class Driver {
    public void dump() {
       System.out.println("Disk size: " + disk +  "RAM usage: " + RAMsize + "Number of registers: " + registers );
       for (CPU cpu : this.cpus) {
-        System.out.println( "CPU: " + pcb.getcpuID());
+        System.out.println( "CPU: " + pcb.getProcessID());
 		   //cpu.printDump();
 		   System.out.println();
       }  
