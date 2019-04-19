@@ -27,7 +27,7 @@ public class Loader
         try 
         {
         File file = new File(inputFile);
-        Scanner scan = new Scanner("Compiletest.txt");
+        Scanner scan = new Scanner("Instructions.txt");
         } catch(Exception e) {
             System.out.print(e);
         }
