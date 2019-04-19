@@ -5,13 +5,14 @@ import com.kennesaw.edu.os.memory.PCB;
 import com.kennesaw.edu.os.scheduler.Scheduler;
 
 // CPU Class
-public class CPU implements ICPU {
+public class CPU implements Runnable {
 	// Global Variables 
 	public int reg1, reg2, sReg1, sReg2, dReg, bReg; // Registers
 	public int addr; // Current address
 	public int numberOfCPUs; // Acquired from main module
 	public int jc, pc; // Job Counter & Program Counter
-	public int cpuID, jobID = 0; // CPUid - Used for multipleCPUs
+	public int processID = 0; // CPUid - Used for multipleCPUs
+	public int jobID = 0;
 	public String cache[]; // Acquired from Memory Module
 	public double cacheUsed; // Value used for metrics (percentage)
 	public Register currentRegisters; // called from helper class 'Register'
@@ -29,39 +30,39 @@ public class CPU implements ICPU {
 	}
 	
 	// Default Constructor
-	public CPU(int cpuID) {
-		//this.currentPCB = currentPCB.getPCB(); // Maybe given a specific processID as a parameter
-		//this.numberOfCPUs = driver.getNumOfCPUS(); // Needs to be added to driver module
-		this.pc = this.currentPCB.getPC(); 
-		this.cpuID = cpuID;
-		//this.jobID = this.currentPCB.getJobID();
+	// NEEDS to call cpu.setPCB after object creation (Must have PCB)
+	public CPU(int processID) {
+		// Set all default CPU Operations
+		this.currentPCB = currentPCB; // Set to null
+		this.pc = 0;
+		this.processID = processID;
+		this.jobID = jobID;
 		this.cacheUsed = 0.0; // Initialize cache to 0.0
-		this.fillCache(); // Sets initial value of cache
 		this.statusOfCPU = CPUStatus.WAITING; // Initial status to CPU object
 	}
 	
-	/* 
 	// Constructor - With PCB 
 	public CPU(PCB pcb) {
-		this.numberOfCPUs = driver.getNumOfCPUS(); // Increments for everytime called
 		this.currentPCB = pcb; // Sets CPU object variable PCB equal to the object
 		this.pc = currentPCB.getPC(); // Get program counter from PCB
-		this.cpuID = currentPCB.getCPUID(); // The value of CPU id should be determined and passed outside of CPU class
-		this.jobID = currentPCB.getJobID(); // Get current jobID from PCB
+		// this.processID = currentPCB.getProcessID();
+		// this.jobID = currentPCB.getJobID(); // Get current jobID from PCB
 		this.cacheUsed = 0.0;
-		this.fillCache(); // Gives value to cache
 		this.statusOfCPU = CPUStatus.WAITING;
-	} */
+	} 
 	
 	// ------------- Main CPU Functions ----------------------
 
-	// Called to fetch instruction
 	public String fetch(int pc) {
+		// Fill cache with instructions
+		fillCache();
 		// Get current instruction from cache using program counter
 		String instruct = cache[pc];
-		//String jobName = currentPCB.getJobName(); // From PCB Class
+		// Assuming CPU has access to correct PCB Object
+		processID = currentPCB.getProcessID();
 		cacheUsed = cacheUsed(cache);
-		jc++; // increment amount of jobs available
+		// increment amount of jobs available
+		jc++; 
 		return instruct;
 	}
 	
@@ -305,7 +306,7 @@ public class CPU implements ICPU {
 	
 	// Assigns value to cache given PC
 	public void fillCache() {
-		cache[addr] = String.valueOf(pc); // Sets cache = value of PC
+		cache[pc] = String.valueOf(addr); // Sets cache = value of addr
 	}
 	
 	// ------------- Getters & Setters ------------------------
@@ -331,13 +332,13 @@ public class CPU implements ICPU {
 	}
 	
 	// Returns the ID of the current CPU(Multi-CPUs)
-	public int getCpuID() {
-		return cpuID;
+	public int getProcessID() {
+		return processID;
 	}
 	
 	// Sets a CPU ID to CPU 
-	public void setCpuID(int cpuID) {
-		this.cpuID = cpuID; 
+	public void setProcessID(int processID) {
+		this.processID = processID; 
 	}
 	
 	// Returns current PCB
@@ -378,12 +379,10 @@ public class CPU implements ICPU {
 	public void printMetrics() {
 		System.out.println("--------------------------\n");
 		System.out.println("JobID: " + jobID);
-		System.out.println("CPUID: " + cpuID);
+		System.out.println("ProcessID: " + processID);
 		System.out.println("Cache Used: " + cacheUsed + "%");
 		System.out.println("Number of I/O Operations: " + numIOOperations);
 		System.out.println("Number of total jobs: " + numOfJobs);
-		// System.out.println("Total Waiting Time: " + scheduler.getWaitTime()); // From Scheduler Class
-		// System.out.println("Total Completion Time: " + scheduler.getCompleteTime()); // From Scheduler Class
 		System.out.println("--------------------------\n");
 	}
 }
