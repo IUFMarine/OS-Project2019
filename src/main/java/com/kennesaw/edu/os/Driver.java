@@ -10,8 +10,6 @@ import com.kennesaw.edu.os.memory.PCB;
 import com.kennesaw.edu.os.memory.PCB.Status;
 import com.kennesaw.edu.os.scheduler.Scheduler;
 import com.kennesaw.edu.os.scheduler.Schedulerprocess;
-//import com.kennesaw.edu.os.memory.CompileTest;
-
 
 import java.io.*;
 import java.util.*;
@@ -55,6 +53,7 @@ public class Driver {
    private static int registerSize = 16;
    private static int disksize = 2048;
    private static int numcpus = 1;
+   private static Schedulerprocess policy = Schedulerprocess.FirstInFirstOut;
    
    
    public Driver( int disksize, int RAMsize, int registerSize, int cacheSize, int numcpus, 
@@ -168,9 +167,9 @@ public class Driver {
       loader = null;
    }
  
-   public static void Main(String []args) {
+   public static void main(String []args) {
       //int[] cpuset = { 1, 4 }
-      for (Schedulerprocess policy : Schedulerprocess.values()) {
+      for (Schedulerprocess schedulerprocess : Schedulerprocess.values()) {//redo this for loop. 
 			for ( int numCPUs : cpuset ) {
             new Driver(disksize, RAMsize, registerSize, cacheSize, numcpus, schedulerprocess);
 				//CPU.reset(); May need a cpu reset method maybe to reset cpuid.
@@ -192,6 +191,9 @@ public class Driver {
       pcblist.add(pcb);
    } 
 }//end driver class
+
+  
+
 
   
 
