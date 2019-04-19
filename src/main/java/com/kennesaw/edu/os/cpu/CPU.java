@@ -1,72 +1,69 @@
+// Current Package
 package com.kennesaw.edu.os.cpu;
-
+// Imports (Packages)
 import com.kennesaw.edu.os.memory.PCB;
 import com.kennesaw.edu.os.scheduler.Scheduler;
 
 // CPU Class
-public class CPU implements ICPU {
+public class CPU implements Runnable {
 	// Global Variables 
 	public int reg1, reg2, sReg1, sReg2, dReg, bReg; // Registers
 	public int addr; // Current address
-	public int numberOfCPUs;
+	public int numberOfCPUs; // Acquired from main module
 	public int jc, pc; // Job Counter & Program Counter
-	public int cpuID, jobID = 0; // CPUid - Used for multipleCPUs
+	public int cpuID; // CPUid - Used for multipleCPUs
+	public int jobID;
+   public int ProcessID;
 	public String cache[]; // Acquired from Memory Module
-	public double cacheUsed;
+	public double cacheUsed; // Value used for metrics (percentage)
 	public Register currentRegisters; // called from helper class 'Register'
 	public Register accumlator; // Called from helper class 'Register'
 	public PCB currentPCB; // Called from pcb class to get information on process
 	public Scheduler scheduler; // Called from scheduler class
 	public String inputBuffer, outputBuffer, tempBuffer; // Buffers
 	public int numIOOperations, numOfJobs; // Metrics
-	// WaitTime and CompletionTime -> Done by scheduler 
-	// Per each job --> Name and Number of Input/Outputs 
-	// Which job is assigned to which CPU 
-	// TODO - Table
+	public CPUStatus statusOfCPU; // Used for completion of processes
 	
-	public CPU() {
-		// TODO Auto-generated constructor stub
+	// Status of current CPU
+	public enum CPUStatus
+	{
+		RUNNING, WAITING, ERROR;
 	}
 	
-	// Constructor
+	// Default Constructor
+	// NEEDS to call cpu.setPCB after object creation (Must have PCB)
+	public CPU(int cpuID) {
+		// Set all default CPU Operations
+		this.currentPCB = currentPCB; // Set to null
+		this.pc = 0;
+		this.cpuID = cpuID;
+		this.jobID = jobID;
+		this.cacheUsed = 0.0; // Initialize cache to 0.0
+		this.statusOfCPU = CPUStatus.WAITING; // Initial status to CPU object
+	}
+	
+	// Constructor - With PCB 
 	public CPU(PCB pcb) {
-		this.numberOfCPUs = 1; // For one CPU
-		this.currentPCB = pcb;
+		this.currentPCB = pcb; // Sets CPU object variable PCB equal to the object
 		this.pc = currentPCB.getPC(); // Get program counter from PCB
-		this.cpuID = cpuID + 1; // Increment current CPUid
-		//this.jobID = pcb.getJobID(); // Get current jobID from PCB
+		// this.processID = currentPCB.getProcessID();
+		// this.jobID = currentPCB.getJobID(); // Get current jobID from PCB
 		this.cacheUsed = 0.0;
-		this.fillCache(); // Gives value to cache
-	}
-	
-	// MultiCPU Constructor
-	public CPU(int numOfCPUs, PCB pcb) {
-		this.numberOfCPUs = numOfCPUs;
-		this.currentPCB = pcb;
-		this.pc = currentPCB.getPC();
-		this.cpuID = cpuID + 1; 
-		//this.jobID = pcb.getJobID();
-		this.cacheUsed = 0.0;
-		// this.fillCache(); Won't work for multiple CPUs
-		// Iterate through number of CPUs
-		
-		/*
-		for (int i = 0; i <= numOfCPUs; i++ ) {
-			CPU cpu = new CPU(pcb);
-		} */
-	}
+		this.statusOfCPU = CPUStatus.WAITING;
+	} 
 	
 	// ------------- Main CPU Functions ----------------------
-	
 
-	// Called to fetch instruction
 	public String fetch(int pc) {
+		// Fill cache with instructions
+		fillCache();
 		// Get current instruction from cache using program counter
 		String instruct = cache[pc];
-		// TODO: Job name and percent of cache used
-		//String jobName = currentPCB.getJobName(); // From PCB Class
+		// Assuming CPU has access to correct PCB Object
+		ProcessID = currentPCB.getProcessID();
 		cacheUsed = cacheUsed(cache);
-		jc++; // increment amount of jobs available
+		// increment amount of jobs available
+		jc++; 
 		return instruct;
 	}
 	
@@ -104,6 +101,7 @@ public class CPU implements ICPU {
 			break;
 		// No valid instruction type given or never assigned
 		default:
+			this.statusOfCPU = CPUStatus.ERROR; // Error instType
 			System.out.println("EXCEPTION: Invalid Instruction Type");
 		}
 		// Returns opcode to use for execution
@@ -275,12 +273,18 @@ public class CPU implements ICPU {
 	
 	// Runs all commands while pc < jc
 	public void run() {
-		// Job Available
 		// While process is ready
 		while (pc < jc) {
 			try {
+				// Executes while jobs are available
 				execute(decode(fetch(pc)));
+				// Once completed set to status and wait for another process
+				this.statusOfCPU = CPUStatus.WAITING;
+				// update process of process?
 			} catch (Exception e) {
+				// There was an error with try/catch. Update status
+				this.statusOfCPU = CPUStatus.ERROR; 
+				// Output Exception error
 				System.out.println(e);
 			}
 		}
@@ -303,7 +307,7 @@ public class CPU implements ICPU {
 	
 	// Assigns value to cache given PC
 	public void fillCache() {
-		cache[addr] = String.valueOf(pc); // Sets cache = value of PC
+		cache[pc] = String.valueOf(addr); // Sets cache = value of addr
 	}
 	
 	// ------------- Getters & Setters ------------------------
@@ -323,9 +327,34 @@ public class CPU implements ICPU {
 		return jobID;
 	}
 	
+	// Sets the job id to CPU
+	public void setJobID(int jobID) {
+		this.jobID = jobID;
+	}
+	
 	// Returns the ID of the current CPU(Multi-CPUs)
-	public int getCpuID() {
-		return cpuID;
+	public int getProcessID() {
+		return ProcessID;
+	}
+	
+	// Sets a CPU ID to CPU 
+	public void setcpuID(int cpuID) {
+		this.cpuID = cpuID; 
+	}
+	
+	// Returns current PCB
+	public PCB getPCB() {
+		return this.currentPCB;
+	}
+	
+	// Sets a new PCB
+	public void setPCB(PCB pcb) {
+		this.currentPCB = pcb;
+	}
+	
+	// Returns current cpu status
+	public CPUStatus getCPUStatus() {
+		return this.statusOfCPU;
 	}
 	
 	// --------------- Metrics --------------------------------
@@ -342,7 +371,7 @@ public class CPU implements ICPU {
 	
 	// Returns percentage of cache used
 	public double cacheUsed(String [] cache) {
-		double percentOfCache = 0.0;
+		double percentOfCache = 0.0; // Initialize
 		percentOfCache = cache.length / 1024; // Divide by initial value
 		return percentOfCache * 100; // Return percentage
 	}
@@ -351,15 +380,10 @@ public class CPU implements ICPU {
 	public void printMetrics() {
 		System.out.println("--------------------------\n");
 		System.out.println("JobID: " + jobID);
-		System.out.println("CPUID: " + cpuID);
+		System.out.println("ProcessID: " + ProcessID);
 		System.out.println("Cache Used: " + cacheUsed + "%");
 		System.out.println("Number of I/O Operations: " + numIOOperations);
 		System.out.println("Number of total jobs: " + numOfJobs);
-		// System.out.println("Total Waiting Time: " + scheduler.getWaitTime()); // From Scheduler Class
-		// System.out.println("Total Completion Time: " + scheduler.getCompleteTime()); // From Scheduler Class
 		System.out.println("--------------------------\n");
 	}
-	
-	// Percent of cache used -- Depending on each application 
-	// Table --> Output (CPU) TODO
 }

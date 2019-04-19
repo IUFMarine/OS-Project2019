@@ -1,21 +1,77 @@
 package com.kennesaw.edu.os.memory;
+
 import java.io.*; 
 public class PCB
 {
-   int cpuID;
-   String Status;
-   int counter;
+   int ProcessID;
+   //String Status;
+   int instructionLength;
    int priority;
    int startingAddress;
    char PC;
-  
-
-    enum Status
+   
+   public enum Status
    {
-      RUNNING, READY, BLOCKED, NEW
+      RUNNING(0), READY(1), BLOCKED(2), NEW(3), TERMINATED(4);
+      
+      public int Status_TYPE;
+      
+      Status(int Status_NUM) {
+         Status_TYPE = Status_NUM;
+      }
+      
+      public int getStatus_NUM() {
+         return this.Status_TYPE;
+      }
    }
-  
+   
 
+   //Total wating time
+   long startWaitingTime = 0;
+   long endWaitingTime = 0;
+   long totalWaitingTime = 0;   
+   //Total running time
+   long startRunningTime = 0;
+   long endRunningTime = 0;
+   long totalRunningTime = 0;
+   
+   public Status status;
+   
+   
+   public void Times() 
+   {
+        //Waiting time measurement---- NEW, BLOCKED, and READY
+        if(status.getStatus_NUM() == 1 || status.getStatus_NUM() == 2 || status.getStatus_NUM() == 3)
+         {       //Waiting Time
+                startWaitingTime = System.nanoTime();
+                if(status.getStatus_NUM() != 1 || status.getStatus_NUM() != 2 || status.getStatus_NUM() != 3)
+                {
+                   endWaitingTime = System.nanoTime();
+                }
+                
+               totalWaitingTime += endWaitingTime - startWaitingTime;
+          }
+          //When it is running status 
+          else if(status.getStatus_NUM() == 0)
+          {
+                //Running Time
+                startRunningTime = System.nanoTime();
+                //Add a process
+                if(status.getStatus_NUM() != 0)
+                {
+                   endRunningTime = System.nanoTime();
+                }
+                
+               totalRunningTime += endRunningTime - startRunningTime;
+          }
+          //When it is terminated
+          else
+          {
+           System.out.println("Terminated");
+           System.out.println("Total Running Time : " + totalRunningTime);
+           System.out.println("Total Waiting Time : " + totalWaitingTime);
+          }
+      }          
    //Setters and getters
    public void setPC(char PC)
    {
@@ -26,13 +82,13 @@ public class PCB
      return this.PC;
    }
    
-   public void setcpuID(int cpuID)
+   public void setProcessID(int ProcessID)
    {
-      this.cpuID = cpuID;
+      this.ProcessID = ProcessID;
    }
-   public int getcpuID()
+   public int getProcessID()
    {
-     return this.cpuID;
+     return this.ProcessID;
    }
  
    
@@ -40,7 +96,7 @@ public class PCB
    {
       this.priority = priority;
    }
-   public int gePriority()
+   public int getPriority()
    {
      return this.priority;
    }
@@ -54,16 +110,24 @@ public class PCB
    {
      return this.startingAddress;
    }
-
-
-   public PCB(int cpuID, String State, int counter, int priority, int startingAddress )
+   
+   public int getInstructionLength()
    {
-      this.cpuID = cpuID;
-      this.Status = Status;
-      this.counter = counter;
+   return this.instructionLength;
+   }
+
+
+   public PCB(int ProcessID, Status status, int instructionLength, int priority, int startingAddress )
+   {
+      this.ProcessID = ProcessID;
+      this.status = status;
       this.priority = priority;
+      this.instructionLength = instructionLength;
       this.startingAddress = startingAddress;
 
    }
 
 }
+
+
+
