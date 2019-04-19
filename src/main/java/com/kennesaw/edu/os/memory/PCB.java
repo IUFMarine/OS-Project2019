@@ -3,7 +3,7 @@ package com.kennesaw.edu.os.memory;
 import java.io.*; 
 public class PCB
 {
-   int cpuID;
+   int ProcessID;
    //String Status;
    int counter;
    int priority;
@@ -82,13 +82,13 @@ public class PCB
      return this.PC;
    }
    
-   public void setcpuID(int cpuID)
+   public void setProcessID(int ProcessID)
    {
-      this.cpuID = cpuID;
+      this.ProcessID = ProcessID;
    }
-   public int getcpuID()
+   public int getProcessID()
    {
-     return this.cpuID;
+     return this.ProcessID;
    }
  
    
@@ -112,9 +112,9 @@ public class PCB
    }
 
 
-   public PCB(int cpuID, Status status, int counter, int priority, int startingAddress )
+   public PCB(int ProcessID, Status status, int counter, int priority, int startingAddress )
    {
-      this.cpuID = cpuID;
+      this.ProcessID = ProcessID;
       this.status = status;
       this.counter = counter;
       this.priority = priority;
