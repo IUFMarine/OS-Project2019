@@ -28,7 +28,7 @@ public class Driver {
    private static Loader loader;
    private Register registers;
    private PCB pcb;
-   public static LinkedList<PCB> pcblist = new LinkedList<PCB>();
+   public static LinkedList<PCB> pcblist;
    public int cpuID;
    public Status status;
    public int counter;
@@ -60,6 +60,7 @@ public class Driver {
    Schedulerprocess schedulerprocess) {
            
       //this.disk = disk;
+      this.pcblist = new LinkedList <PCB>();
       this.disksize = disksize;
       this.RAMsize = RAMsize;
       this.registerSize = registerSize; 
@@ -68,9 +69,9 @@ public class Driver {
       this.schedulerprocess = schedulerprocess;
       
       
-      this.dispatcher = new Dispatcher(cpus, memory);
+      
       this.registers = new Register();
-      this.scheduler = new Scheduler(memory, disk, pcb, schedulerprocess);
+      
       this.loader = new Loader("C://Users//Marc//Desktop//OS-Project2019-master//OS-Project2019-master//src//main//java//com//kennesaw//edu//os//Instructions.txt");
       this.pcb = new PCB(cpuID, status, counter, priority, startingAddress);
       
@@ -79,6 +80,7 @@ public class Driver {
       //code for an output file here.
       
       this.cpus = new CPU[numcpus];
+     //System.out.println(this.cpus);
       this.threads = new Thread[this.cpus.length];
    
       for (int x = 0; x < this.cpus.length; x++ ) {
@@ -91,6 +93,8 @@ public class Driver {
       for(int y = 0; y < this.pcb.getPC(); y++) {
          insertpcb(pcb); 
       }
+      this.dispatcher = new Dispatcher(cpus, memory);
+      this.scheduler = new Scheduler(memory, disk, pcb, schedulerprocess, pcblist, dispatcher);
    }
    
    public void loadingfile(String inputfile) {
@@ -104,7 +108,7 @@ public class Driver {
          boolean jobscomplete = false;
          while(!jobscomplete) {
             this.scheduler.run();
-            this.dispatcher.run();
+            //this.dispatcher.run();
          
             boolean jobcompleted = true;
             for(PCB pcb: this.pcblist) {

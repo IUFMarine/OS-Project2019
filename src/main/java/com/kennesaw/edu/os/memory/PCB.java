@@ -67,7 +67,7 @@ public class PCB
           //When it is terminated
           else
           {
-           System.out.println("Terminated");
+           System.out.println("Process " + ProcessID + "Terminated");
            System.out.println("Total Running Time : " + totalRunningTime);
            System.out.println("Total Waiting Time : " + totalWaitingTime);
           }
@@ -114,6 +114,16 @@ public class PCB
    public int getInstructionLength()
    {
    return this.instructionLength;
+   }
+   
+   public long getWaitingTime()
+   {
+   return this.totalWaitingTime;
+   }
+   
+   public long getRunningTime()
+   {
+   return this.totalRunningTime;
    }
 
 

@@ -4,7 +4,7 @@ import java.io.*;
 
 
 // Helper Class 
-class Converter
+public class Converter
 {
     // Hexadecimal TO Decimal
 	public static int hexToDecimal (String hexValue)
@@ -42,4 +42,10 @@ class Converter
 	    int decimal = Integer.parseInt(binValue, 2);
 	    return Integer.toHexString(decimal);
 	}
+    // Function to change the string of binary to integer
+    public static int binaryStringToInteger(String binStr) {
+        int nInt = Integer.parseInt(binStr, 2); // Change binary string to int value
+        return nInt;
+    }
+
 }
