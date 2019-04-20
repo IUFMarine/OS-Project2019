@@ -29,7 +29,7 @@ public class Scheduler implements Runnable {
    int holder;
    
 
-   public Scheduler(Memory memory, Disk disk, PCB pcb, CPU cpu, Schedulerprocess schedulerprocess, LinkedList<PCB> pcblist, LinkedList<CPU> cpuStatusList, Dispatcher dispatcher) {
+   public Scheduler(Memory memory, Disk disk, PCB pcb, Schedulerprocess schedulerprocess, LinkedList<PCB> pcblist, LinkedList<CPU> cpuStatusList, Dispatcher dispatcher) {
    
       this.cpu = cpu;
       this.pcb = pcb;
@@ -90,7 +90,7 @@ public class Scheduler implements Runnable {
             }
          }
          
-      CPU readycpu; 
+     /* CPU readycpu; 
      for(int x = 0; x < cpuStatusList.size(); x++)
      {
      CPU cpucheck = new CPU(5);
@@ -101,7 +101,7 @@ public class Scheduler implements Runnable {
       readycpu = cpucheck;
       continue; 
  }
- }
+ }*/
  while(Jobqueue.size() != 0){
  PCB temppcb;
  

@@ -96,7 +96,7 @@ public class Driver {
          insertpcb(pcb); 
       }
       this.dispatcher = new Dispatcher();
-      this.scheduler = new Scheduler(memory, disk, pcb, cpu, schedulerprocess, pcblist, cpuStatusList, dispatcher);
+      this.scheduler = new Scheduler(memory, disk, pcb, schedulerprocess, pcblist, cpuStatusList, dispatcher);
    }
    
    public void loadingfile(String inputfile) {
