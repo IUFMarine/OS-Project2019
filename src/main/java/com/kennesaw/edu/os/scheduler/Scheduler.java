@@ -66,7 +66,12 @@ public class Scheduler implements Runnable {
          for(int q = 0; q < size; q++) {
             this.memory.writeMemory(q, pcb.getStartingAddress() + Address2);//change string parameter here.
          }
+         
+         
             readyqueue.add(pcb);//pseudo coded.
+            
+            dispatcher.setPCB(pcb);
+            dispatcher.run();
 				pcb.status = pcb.status.READY;
 			}
 		}
