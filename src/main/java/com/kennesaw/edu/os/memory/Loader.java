@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Scanner;
+import com.kennesaw.edu.os.Driver;
 
 public class Loader
 {
@@ -57,6 +58,7 @@ public class Loader
                  
                   
                   PCB pcb = new PCB(jobID, PCB.Status.NEW, num_of_words, priority, startingAddress);
+                  Driver.insertpcb(pcb);
                   startingAddress += num_of_words;
                 }//end if
                 

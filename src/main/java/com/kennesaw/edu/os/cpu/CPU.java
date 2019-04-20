@@ -28,7 +28,17 @@ public class CPU implements Runnable {
     // Status of current CPU
    public enum CPUStatus
    {
-      RUNNING, WAITING, ERROR;
+      RUNNING(0), WAITING(1), ERROR(2);
+      public int Status_TYPE;
+      
+      CPUStatus(int Status_NUM) {
+         Status_TYPE = Status_NUM;
+      }
+      
+      public int getStatus_NUM() {
+         return this.Status_TYPE;
+      }
+   
    }
     
     // Default Constructor

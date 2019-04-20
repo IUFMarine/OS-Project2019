@@ -29,6 +29,7 @@ public class Driver {
    private Register registers;
    private PCB pcb;
    public static LinkedList<PCB> pcblist;
+   public static LinkedList<CPU> cpuStatusList;
    public int cpuID;
    public Status status;
    public int counter;
@@ -84,8 +85,9 @@ public class Driver {
       this.threads = new Thread[this.cpus.length];
    
       for (int x = 0; x < this.cpus.length; x++ ) {
-			CPU cpu = new CPU(x); //maybe place pcb into parameter here. 
+			CPU cpu = new CPU(x);  
 		   this.cpus[x] = cpu;
+         cpuStatusList.add(cpu);
 			this.threads[x] = new Thread( this.cpus[x] );
          //cpu.printDump();
       }
@@ -93,8 +95,8 @@ public class Driver {
       for(int y = 0; y < this.pcb.getPC(); y++) {
          insertpcb(pcb); 
       }
-      this.dispatcher = new Dispatcher(cpus, memory);
-      this.scheduler = new Scheduler(memory, disk, pcb, schedulerprocess, pcblist, dispatcher);
+      this.dispatcher = new Dispatcher();
+      this.scheduler = new Scheduler(memory, disk, pcb, cpu, schedulerprocess, pcblist, cpuStatusList, dispatcher);
    }
    
    public void loadingfile(String inputfile) {
