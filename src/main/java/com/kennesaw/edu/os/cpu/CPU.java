@@ -16,12 +16,12 @@ public class CPU implements Runnable {
    public int jobID;
    public int processID;
    public Memory ram;
-   public String cache[]; // Acquired from Memory Module
+   public String cache[] = new String[1024]; // Acquired from Memory Module
    public double cacheUsed; // Value used for metrics (percentage)
    public Register currentRegisters; // called from helper class 'Register'
    public Register accumlator; // Called from helper class 'Register'
    public PCB currentPCB; // Called from pcb class to get information on process
-   public String inputBuffer, outputBuffer, tempBuffer; // Buffers
+   public int inputBuffer, outputBuffer, tempBuffer; // Buffers
    public int numIOOperations, numOfJobs; // Metrics
    public CPUStatus statusOfCPU; // Used for completion of processes
     
@@ -41,9 +41,7 @@ public class CPU implements Runnable {
    
    }
     
-    // Default Constructor
-    // NEEDS to call cpu.setPCB after object creation (Must have PCB)
-   public CPU(int cpuID) {
+    public CPU(int cpuID) {
         // Set all default CPU Operations
       this.currentPCB = null; // Set to null
       this.pc = -1; // initial values
@@ -60,12 +58,11 @@ public class CPU implements Runnable {
         // Fill cache with instructions
       fillCache();
         // Get current instruction from cache using program counter
+      System.out.println("cache filled ;)");
       String instruct = cache[pc];
         // Assuming CPU has access to correct PCB Object
       processID = currentPCB.getProcessID();
       cacheUsed = cacheUsed(cache);
-        // increment amount of jobs available
-      jc++; // maybe use this.jc++ instead
       return instruct;
    }
     
@@ -73,6 +70,7 @@ public class CPU implements Runnable {
    public int decode(String instruct) {
         // Local Variables - Used to extract directions for given instructions
       String binInstr = Converter.hexToBinary(instruct.substring(2));
+      System.out.println(binInstr);
       String tmpInstr = binInstr; // Used as a placeholder
       int instType = Integer.parseInt(tmpInstr.substring(0,2));
       int opCode = Converter.binaryStringToInteger(tmpInstr.substring(2,8));
@@ -107,6 +105,7 @@ public class CPU implements Runnable {
             System.out.println("EXCEPTION: Invalid Instruction Type");
       }
         // Returns opcode to use for execution
+      System.out.println(opCode);
       return opCode;
    }
     
@@ -125,11 +124,13 @@ public class CPU implements Runnable {
          // OpCode {02} - Stores content of a reg. into an address
          case 2:
             addr = currentRegisters.getReg(dReg);
+            // Memory.writeMemory(addr, currentRegisters.getReg((int)addr)); // Right context of memory. Write to memory or disk
             // Write to memory? (Phase 2)
             break;
         // OpCode {03} - Loads the content of an address into a reg
          case 3:
             currentRegisters.setReg(currentRegisters.getReg((int)addr), dReg);
+            // Memory.writeMemory(addr, currentRegisters.getReg((int)addr)); // Right context of memory. Write to memory or disk
             // Write to memory? Phase(2)
             break;
         // OpCode {04} - Transfers the content of one register into another
@@ -277,45 +278,49 @@ public class CPU implements Runnable {
    }
     
     // Runs all commands while pc < jc
-   @Override
-    public void run() {
-   // Sets current PCB
-      if (this.currentPCB == null)
+    @Override
+   	public void run() {
+      // Sets current PCB
+      if (this.currentPCB == null) 
       {
          System.out.println("Error: CPU passed null PCB object");
          this.statusOfCPU = CPUStatus.ERROR;
          return;
       }
-   // Get the pc and jc from the PCB
-      pc = this.currentPCB.getPC();
+      // Get the Job Count from the PCB
       jc = this.currentPCB.getInstructionLength();
-      System.out.println("PC: " + pc);
-      System.out.println("JC: " + jc);
-    
-   // Loops until all jobs are finished
-      while (jc != -1) {
+      numOfJobs = jc; // For metrics
+      pc = this.currentPCB.getStartingAddress();
+      inputBuffer = currentPCB.getInput_Buffer();
+      outputBuffer = currentPCB.getOutput_Buffer();
+      // Loops until all jobs are finished
+      while (jc > 0) { 
          try {
-         // Executes while jobs are available
+        	// Set pc value each iteration of while loop
+           
+            // Executes while jobs are available
+            System.out.println(Memory.readMemory(pc));
             execute(decode(fetch(pc)));
-         // Once completed set to status and wait for another process
-            this.statusOfCPU = CPUStatus.WAITING;
+            // Once completed set to status and wait for another process
+            //this.statusOfCPU = CPUStatus.WAITING;
+            pc++;
             jc--; // Decrement total jobs
          } catch (Exception e) {
-         // There was an error with try/catch. Update status
+            // There was an error with try/catch. Update status
             this.statusOfCPU = CPUStatus.ERROR;
-         // Output Exception error
-            System.out.println(e);
+            System.exit(1);
+            // Output Exception error
+            System.out.println("Exception Error: " + e);
          }
       }
+      // Once jobs are completed then set currentPCB to null
       this.currentPCB = null;
    }
     
-    // ------------- Helper Functions -------------------------
-    
     // Assigns value to cache given PC
    public void fillCache() {
-        // maybe use ram object
-      cache[pc] = String.valueOf(addr); // Sets cache = value of addr
+	  // Read value of memory at the given address
+      cache[pc] = Memory.readMemory(pc);
    }
     
     // ------------- Getters & Setters ------------------------
@@ -330,7 +335,7 @@ public class CPU implements Runnable {
       cache = cache_;
    }
  
-    // Get instnace of RAM
+   // Get instance of RAM
    public void setRAM(Memory ram) {
       this.ram = ram;
    }
@@ -400,6 +405,3 @@ public class CPU implements Runnable {
       System.out.println("--------------------------\n");
    }
 }
- 
- 
-

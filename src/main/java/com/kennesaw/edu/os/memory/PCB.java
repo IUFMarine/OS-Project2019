@@ -9,6 +9,9 @@ public class PCB //implements Comparable
    int priority;
    int startingAddress;
    char PC;
+   int Input_Buffer;
+   int Output_Buffer;
+   int temp_buffer_size;
    
    public enum Status
    {
@@ -21,9 +24,10 @@ public class PCB //implements Comparable
       }
       
       public int getStatus_NUM() {
-      System.out.println(this.Status_TYPE);
+         System.out.println(this.Status_TYPE);
          return this.Status_TYPE;
       }
+            
    }
    
 
@@ -42,37 +46,37 @@ public class PCB //implements Comparable
    public void Times() 
    {
         //Waiting time measurement---- NEW, BLOCKED, and READY
-        if(status.getStatus_NUM() == 1 || status.getStatus_NUM() == 2 || status.getStatus_NUM() == 3)
-         {       //Waiting Time
-                startWaitingTime = System.nanoTime();
-                if(status.getStatus_NUM() != 1 || status.getStatus_NUM() != 2 || status.getStatus_NUM() != 3)
-                {
-                   endWaitingTime = System.nanoTime();
-                }
+      if(status.getStatus_NUM() == 1 || status.getStatus_NUM() == 2 || status.getStatus_NUM() == 3)
+      {       //Waiting Time
+         startWaitingTime = System.nanoTime();
+         if(status.getStatus_NUM() != 1 || status.getStatus_NUM() != 2 || status.getStatus_NUM() != 3)
+         {
+            endWaitingTime = System.nanoTime();
+         }
                 
-               totalWaitingTime += endWaitingTime - startWaitingTime;
-          }
+         totalWaitingTime += endWaitingTime - startWaitingTime;
+      }
           //When it is running status 
-          else if(status.getStatus_NUM() == 0)
-          {
+      else if(status.getStatus_NUM() == 0)
+      {
                 //Running Time
-                startRunningTime = System.nanoTime();
+         startRunningTime = System.nanoTime();
                 //Add a process
-                if(status.getStatus_NUM() != 0)
-                {
-                   endRunningTime = System.nanoTime();
-                }
+         if(status.getStatus_NUM() != 0)
+         {
+            endRunningTime = System.nanoTime();
+         }
                 
-               totalRunningTime += endRunningTime - startRunningTime;
-          }
+         totalRunningTime += endRunningTime - startRunningTime;
+      }
           //When it is terminated
-          else
-          {
-           System.out.println("Process " + ProcessID + "Terminated");
-           System.out.println("Total Running Time : " + totalRunningTime);
-           System.out.println("Total Waiting Time : " + totalWaitingTime);
-          }
-      }          
+      else
+      {
+         System.out.println("Process " + ProcessID + "Terminated");
+         System.out.println("Total Running Time : " + totalRunningTime);
+         System.out.println("Total Waiting Time : " + totalWaitingTime);
+      }
+   }          
    //Setters and getters
    public void setPC(char PC)
    {
@@ -80,7 +84,7 @@ public class PCB //implements Comparable
    }
    public int getPC()
    {
-     return this.PC;
+      return this.PC;
    }
    
    public void setProcessID(int ProcessID)
@@ -89,7 +93,7 @@ public class PCB //implements Comparable
    }
    public int getProcessID()
    {
-     return this.ProcessID;
+      return this.ProcessID;
    }
  
    
@@ -99,7 +103,7 @@ public class PCB //implements Comparable
    }
    public int getPriority()
    {
-     return this.priority;
+      return this.priority;
    }
    
    public void setStartingAddress(int startingAddress)
@@ -109,24 +113,45 @@ public class PCB //implements Comparable
    
    public int getStartingAddress()
    {
-     return this.startingAddress;
+      return this.startingAddress;
    }
    
    public int getInstructionLength()
    {
-   return this.instructionLength;
+      return this.instructionLength;
    }
    
    public long getWaitingTime()
    {
-   return this.totalWaitingTime;
+      return this.totalWaitingTime;
    }
    
    public long getRunningTime()
    {
-   return this.totalRunningTime;
+      return this.totalRunningTime;
    }
    
+   public void setInput_Buffer(int b)
+   {
+      this.Input_Buffer = b;
+   }
+   
+   public int getInput_Buffer()
+   {
+      return this.Input_Buffer;
+   }
+   
+   public void setOutput_Buffer(int b)
+   {
+      this.Output_Buffer = b;
+   }
+
+   public int getOutput_Buffer()
+   {
+      return this.Output_Buffer;
+   }
+
+
    //@override public compareTo()
 
 
@@ -137,7 +162,7 @@ public class PCB //implements Comparable
       this.priority = priority;
       this.instructionLength = instructionLength;
       this.startingAddress = startingAddress;
-
+   
    }
 
 }

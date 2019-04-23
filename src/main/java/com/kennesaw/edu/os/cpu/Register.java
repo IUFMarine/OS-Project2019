@@ -4,7 +4,7 @@ public class Register {
 	
 	// Global Variables
 	int [] CPU_Register = null; // Initialize To Empty
-	String [] accumlator;
+	int [] accumlator;
 	String data;
 
 	// Constructor
@@ -30,11 +30,11 @@ public class Register {
 		return CPU_Register[position];
 	}
 	
-	public void readBuffer(String buffer, int addr) {
+	public void readBuffer(int buffer, int addr) {
 		accumlator[addr] = buffer; // Set's data to parameter
 	}
 	
-	public String writeBuffer(String buffer, int addr) {
+	public int writeBuffer(int buffer, int addr) {
 		buffer = accumlator[addr];
 		return buffer;
 	}

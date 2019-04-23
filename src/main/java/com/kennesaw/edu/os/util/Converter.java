@@ -1,6 +1,7 @@
 package com.kennesaw.edu.os.util;
 import java.util.*;
 import java.io.*;
+import java.math.BigInteger;
 
 
 // Helper Class 
@@ -13,11 +14,22 @@ public class Converter
 	} 
 	
 	// Hexadecimal TO Binary
-	public static String hexToBinary (String hexValue)
-	{
+	//public static String hexToBinary (String hexValue)
+   
+   public static String hexToBinary(String hex) {
+    return new BigInteger(hex, 16).toString(2);
+ }
+   
+   
+   
+   
+   
+	/*{
+       System.out.println(hexValue);
 	    int decimal = Integer.parseInt(hexValue,16);
+       System.out.println(decimal);
 	    return Integer.toBinaryString(decimal);
-	}
+	}*/
 	
 	// Decimal TO Hexadecimal
 	public static String decToHexadecimal (int decValue)
