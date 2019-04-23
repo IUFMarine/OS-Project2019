@@ -28,17 +28,7 @@ public class CPU implements Runnable {
     // Status of current CPU
    public enum CPUStatus
    {
-      RUNNING(0), WAITING(1), ERROR(2);
-      public int Status_TYPE;
-      
-      CPUStatus(int Status_NUM) {
-         Status_TYPE = Status_NUM;
-      }
-      
-      public int getStatus_NUM() {
-         return this.Status_TYPE;
-      }
-   
+      RUNNING, WAITING, ERROR;
    }
     
     // Default Constructor
@@ -64,8 +54,6 @@ public class CPU implements Runnable {
         // Assuming CPU has access to correct PCB Object
       processID = currentPCB.getProcessID();
       cacheUsed = cacheUsed(cache);
-        // increment amount of jobs available
-      jc++; // maybe use this.jc++ instead
       return instruct;
    }
     
@@ -125,11 +113,13 @@ public class CPU implements Runnable {
          // OpCode {02} - Stores content of a reg. into an address
          case 2:
             addr = currentRegisters.getReg(dReg);
+            // Memory.writeMemory(addr, currentRegisters.getReg((int)addr)); // Right context of memory. Write to memory or disk
             // Write to memory? (Phase 2)
             break;
         // OpCode {03} - Loads the content of an address into a reg
          case 3:
             currentRegisters.setReg(currentRegisters.getReg((int)addr), dReg);
+            // Memory.writeMemory(addr, currentRegisters.getReg((int)addr)); // Right context of memory. Write to memory or disk
             // Write to memory? Phase(2)
             break;
         // OpCode {04} - Transfers the content of one register into another
@@ -277,45 +267,44 @@ public class CPU implements Runnable {
    }
     
     // Runs all commands while pc < jc
-   @Override
-    public void run() {
-   // Sets current PCB
-      if (this.currentPCB == null)
+    @Override
+   	public void run() {
+      // Sets current PCB
+      if (this.currentPCB == null) 
       {
          System.out.println("Error: CPU passed null PCB object");
          this.statusOfCPU = CPUStatus.ERROR;
          return;
       }
-   // Get the pc and jc from the PCB
-      pc = this.currentPCB.getPC();
+      // Get the Job Count from the PCB
       jc = this.currentPCB.getInstructionLength();
-      System.out.println("PC: " + pc);
-      System.out.println("JC: " + jc);
-    
-   // Loops until all jobs are finished
-      while (jc != -1) {
+      numOfJobs = jc; // For metrics
+      
+      // Loops until all jobs are finished
+      while (jc > 0) { 
          try {
-         // Executes while jobs are available
+        	// Set pc value each iteration of while loop
+            pc = this.currentPCB.getPC();
+            // Executes while jobs are available
             execute(decode(fetch(pc)));
-         // Once completed set to status and wait for another process
+            // Once completed set to status and wait for another process
             this.statusOfCPU = CPUStatus.WAITING;
             jc--; // Decrement total jobs
          } catch (Exception e) {
-         // There was an error with try/catch. Update status
+            // There was an error with try/catch. Update status
             this.statusOfCPU = CPUStatus.ERROR;
-         // Output Exception error
-            System.out.println(e);
+            // Output Exception error
+            System.out.println("Exception Error: " + e);
          }
       }
+      // Once jobs are completed then set currentPCB to null
       this.currentPCB = null;
    }
     
-    // ------------- Helper Functions -------------------------
-    
     // Assigns value to cache given PC
    public void fillCache() {
-        // maybe use ram object
-      cache[pc] = String.valueOf(addr); // Sets cache = value of addr
+	  // Read value of memory at the given address
+      cache[pc] = Memory.readMemory(addr);
    }
     
     // ------------- Getters & Setters ------------------------
@@ -330,7 +319,7 @@ public class CPU implements Runnable {
       cache = cache_;
    }
  
-    // Get instnace of RAM
+   // Get instance of RAM
    public void setRAM(Memory ram) {
       this.ram = ram;
    }
@@ -400,6 +389,3 @@ public class CPU implements Runnable {
       System.out.println("--------------------------\n");
    }
 }
- 
- 
-
