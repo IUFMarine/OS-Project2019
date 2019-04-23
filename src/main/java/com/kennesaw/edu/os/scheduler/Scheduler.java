@@ -12,7 +12,7 @@ import com.kennesaw.edu.os.cpu.CPU.CPUStatus;
 
 import java.util.*;
 
-public class Scheduler implements Runnable, Comparable {
+public class Scheduler implements Runnable {
 
    private Memory memory;
    private Disk disk;
@@ -23,6 +23,8 @@ public class Scheduler implements Runnable, Comparable {
    public LinkedList<PCB> readyqueue = new LinkedList<PCB>();
    public LinkedList<PCB> Jobqueue = new LinkedList<PCB>();
    public LinkedList<PCB> pcblist;//temp. a string list might need to change data structure for other variables as well.
+   public LinkedList<PCB> waitingList = new LinkedList<PCB>();
+   public LinkedList<PCB> termList = new LinkedList<PCB>();
    public LinkedList<CPU> cpuStatusList;
    public String Address = " ";
    public String Address2 = " ";
@@ -66,51 +68,77 @@ public class Scheduler implements Runnable, Comparable {
    	// Remove terminated processes from the RAM, may need to change read or other parameters.
       for (PCB pcb : this.pcblist) {
          if (pcb.status.getStatus_NUM() == 4) {
+            termList.add(pcb);
+            pcblist.remove(pcb);
             for ( int x = 0; x < pcblist.size(); x++ ) {
                Memory.writeMemory(pcb.getStartingAddress(), pcb.getStartingAddress() + Address);
             }			
          }
       }
-   
+      for (PCB pcb : this.waitingList)
+      {
+         if(pcb.status.getStatus_NUM() != 1 || pcb.status.getStatus_NUM() != 2 || pcb.status.getStatus_NUM() != 3)
+         {
+            pcblist.add(pcb);
+            waitingList.remove(pcb);
+         }
+      
+      }
    
    	// Find next process
       if ( pcblist.size() > 0 ) {
          System.out.println("PCB list is populated");
          for(int i = 0; i < pcblist.size(); i++) {
-            Jobqueue.add(pcb);
-            System.out.println(Jobqueue.get(i));
+            Jobqueue.add(pcblist.get(i));
+            System.out.println("PCB Added to JobQueue" + Jobqueue.get(i));
          }
          if ( this.schedulerprocess == Schedulerprocess.Priority ) {
             System.out.println("Scheduler operating under Priority Scheduling");
          	//Find highest priority process
-            PCB pcbp =  Collections.max(Jobqueue, Comparator.comparing(pcb -> pcb.getPriority()));        
-            if(pcbp.status.getStatus_NUM() == 1)
+            PCB pcbp;
+            pcbp =  Collections.max(Jobqueue, Comparator.comparing(pcb -> pcb.getPriority()));
+            System.out.println("Max Priority PCB: " + pcbp);
+            System.out.println(pcbp.instructionLength);       
+            if(pcbp.status.getStatus_NUM() == 3 )
             {
-            System.out.println(pcbp);
-            writeDiskToMem(pcbp);
-            readyqueue.add(pcbp); 
-            Jobqueue.remove(pcbp);
-            if(Jobqueue.size() == 0)
-            {
-               Driver.jobscomplete = true;
-            }  
+               //System.out.println(pcbp);
+               writeDiskToMem(pcbp);
+               readyqueue.add(pcbp); 
+               Jobqueue.remove(pcbp);
+               if(Jobqueue.size() == 0)
+               {
+                  Driver.jobscomplete = true;
+               }  
             }
             else 
             {
+               waitingList.add(pcbp);
+               Jobqueue.remove(pcbp);
             }
                       
          }
       } else if ( this.schedulerprocess == Schedulerprocess.FirstInFirstOut ) {
          System.out.println("Scheduler operating under FIFO Scheduling");
          for(int z = 0; z < pcblist.size(); z++) {
+            
             PCB pcbp = pcblist.getFirst();
-            writeDiskToMem(pcbp);
-            readyqueue.add(pcbp); 
-            Jobqueue.remove(pcbp);
-            if(Jobqueue.size() == 0)
+            if(pcbp.status.getStatus_NUM() == 1 || pcbp.status.getStatus_NUM() == 2 || pcbp.status.getStatus_NUM() == 3)
             {
-               Driver.jobscomplete = true;
-            }         
+            
+               writeDiskToMem(pcbp);
+               readyqueue.add(pcbp); 
+               Jobqueue.remove(pcbp);
+               if(Jobqueue.size() == 0)
+               {
+                  Driver.jobscomplete = true;
+               } 
+            }
+            else 
+            {
+               waitingList.add(pcbp);
+               Jobqueue.remove(pcbp);
+            }
+         
          }
       }
       while(readyqueue.size() != 0){  

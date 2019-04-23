@@ -1,11 +1,11 @@
 package com.kennesaw.edu.os.memory;
 
 import java.io.*; 
-public class PCB
+public class PCB //implements Comparable
 {
-   int ProcessID;
+   public int ProcessID;
    //String Status;
-   int instructionLength;
+   public int instructionLength;
    int priority;
    int startingAddress;
    char PC;
@@ -21,6 +21,7 @@ public class PCB
       }
       
       public int getStatus_NUM() {
+      System.out.println(this.Status_TYPE);
          return this.Status_TYPE;
       }
    }
@@ -125,6 +126,8 @@ public class PCB
    {
    return this.totalRunningTime;
    }
+   
+   //@override public compareTo()
 
 
    public PCB(int ProcessID, Status status, int instructionLength, int priority, int startingAddress )

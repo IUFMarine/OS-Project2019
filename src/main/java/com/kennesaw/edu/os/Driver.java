@@ -113,20 +113,23 @@ public class Driver {
       while(!jobscomplete) {
          this.scheduler.run();
                      
-         boolean jobcompleted = true;
-         for(PCB pcb: this.pcblist) {
-            if(pcb.status.getStatus_NUM() != 4) {
-               jobcompleted = false;
-            }
+         if (scheduler.Jobqueue.size() == 0 && scheduler.readyqueue.size() == 0 && scheduler.waitingList.size() == 0 && scheduler.termList.size() > 0) 
+         {
+            jobscomplete = true;
+            System.out.println("all tasks completed");
          }
             
-         boolean notalive = true;
+      }
+            
+    /*     boolean notalive = true;
          for (Thread thread : this.threads) {
             if(thread != null) {
                notalive = false;
             }
          }
       }
+      
+      
       for (CPU cpu : this.cpus) {
       	//cpu.signalShutdown(); -- might need for later.
          synchronized (cpu) {
@@ -159,7 +162,7 @@ public class Driver {
                break;
             }
          }
-      } while (!ATJoined);        
+      } while (!ATJoined);      */  
    
    
       //if(loader == completed) {
