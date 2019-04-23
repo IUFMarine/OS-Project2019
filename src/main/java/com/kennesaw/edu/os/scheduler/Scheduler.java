@@ -12,7 +12,7 @@ import com.kennesaw.edu.os.cpu.CPU.CPUStatus;
 
 import java.util.*;
 
-public class Scheduler implements Runnable {
+public class Scheduler implements Runnable, Comparable {
 
    private Memory memory;
    private Disk disk;
@@ -62,11 +62,12 @@ public class Scheduler implements Runnable {
 
 
    @Override public void run() {
+      System.out.println("Scheduler Initialize");
    	// Remove terminated processes from the RAM, may need to change read or other parameters.
       for (PCB pcb : this.pcblist) {
          if (pcb.status.getStatus_NUM() == 4) {
             for ( int x = 0; x < pcblist.size(); x++ ) {
-              Memory.writeMemory(pcb.getStartingAddress(), pcb.getStartingAddress() + Address);
+               Memory.writeMemory(pcb.getStartingAddress(), pcb.getStartingAddress() + Address);
             }			
          }
       }
@@ -74,45 +75,77 @@ public class Scheduler implements Runnable {
    
    	// Find next process
       if ( pcblist.size() > 0 ) {
+         System.out.println("PCB list is populated");
          for(int i = 0; i < pcblist.size(); i++) {
             Jobqueue.add(pcb);
+            System.out.println(Jobqueue.get(i));
          }
          if ( this.schedulerprocess == Schedulerprocess.Priority ) {
+            System.out.println("Scheduler operating under Priority Scheduling");
          	//Find highest priority process
-           PCB pcbp =  Collections.max(Jobqueue, Comparator.comparing(pcb -> pcb.getPriority()));
-           writeDiskToMem(pcbp);
-           readyqueue.add(pcbp); 
-           Jobqueue.remove(pcbp);              
+            PCB pcbp =  Collections.max(Jobqueue, Comparator.comparing(pcb -> pcb.getPriority()));        
+            if(pcbp.status.getStatus_NUM() == 1)
+            {
+            System.out.println(pcbp);
+            writeDiskToMem(pcbp);
+            readyqueue.add(pcbp); 
+            Jobqueue.remove(pcbp);
+            if(Jobqueue.size() == 0)
+            {
+               Driver.jobscomplete = true;
+            }  
             }
-         } else if ( this.schedulerprocess == Schedulerprocess.FirstInFirstOut ) {
-            for(int z = 0; z < pcblist.size(); z++) {
-               pcblist.get(z);
+            else 
+            {
+            }
+                      
+         }
+      } else if ( this.schedulerprocess == Schedulerprocess.FirstInFirstOut ) {
+         System.out.println("Scheduler operating under FIFO Scheduling");
+         for(int z = 0; z < pcblist.size(); z++) {
+            PCB pcbp = pcblist.getFirst();
+            writeDiskToMem(pcbp);
+            readyqueue.add(pcbp); 
+            Jobqueue.remove(pcbp);
+            if(Jobqueue.size() == 0)
+            {
+               Driver.jobscomplete = true;
+            }         
+         }
+      }
+      while(readyqueue.size() != 0){  
+         System.out.println(readyqueue.getFirst()); 
+         CPU readycpu; 
+         CPU cpucheck;
+         for(int x = 0; x < cpuStatusList.size(); x++)
+         {
+         
+            cpucheck = cpuStatusList.get(x);
+            System.out.println(cpucheck);
+         
+            if(cpucheck.statusOfCPU.getStatus_NUM() == 1)
+            {
+               System.out.println("Ready CPU found");
+               readycpu = cpucheck;
+               dispatcher.setCPU(readycpu);
+               continue; 
             }
          }
+      
+         PCB temppcb;
+         if(readyqueue != null)
+         {
+            temppcb = readyqueue.getFirst();
+            if(temppcb != null)
+               dispatcher.setPCB(temppcb);
+            else
+               System.out.println("Null PCB object in Dispatcher");
          
-     /* CPU readycpu; 
-     for(int x = 0; x < cpuStatusList.size(); x++)
-     {
-     CPU cpucheck = new CPU(5);
-      cpucheck = cpuStatusList.get(x);
-     
-      if(cpucheck.CPUStatus.getStatus_NUM() == 0)
-      {
-      readycpu = cpucheck;
-      continue; 
- }
- }*/
- while(Jobqueue.size() != 0){
- PCB temppcb;
- 
- temppcb = Jobqueue.getFirst();
- 
-      dispatcher.setCPU(cpu);
-      dispatcher.setPCB(temppcb);
-      dispatcher.run();
-      pcb.status = pcb.status.RUNNING;
-      Jobqueue.remove();
-   }
+            dispatcher.run();
+            pcb.status = pcb.status.RUNNING;
+            readyqueue.remove();
+         }
+      }
    }
 }
 

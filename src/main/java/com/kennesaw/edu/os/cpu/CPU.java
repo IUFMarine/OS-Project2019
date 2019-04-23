@@ -277,32 +277,33 @@ public class CPU implements Runnable {
    }
     
     // Runs all commands while pc < jc
-   @Override  public void run() {
-        // Sets current PCB
-        //this.currentPCB = pcb;
-      if (this.currentPCB == null) 
+   @Override
+    public void run() {
+   // Sets current PCB
+      if (this.currentPCB == null)
       {
          System.out.println("Error: CPU passed null PCB object");
          this.statusOfCPU = CPUStatus.ERROR;
          return;
       }
-      if (pc == -1 || jc == -1) // If still at initial value
-      {
-         System.out.println("Error: CPU values still initial, cause fuck you thats why");
-         this.statusOfCPU = CPUStatus.ERROR;
-         return;
-      }
-      while (pc < jc) { // might be infinite
+   // Get the pc and jc from the PCB
+      pc = this.currentPCB.getPC();
+      jc = this.currentPCB.getInstructionLength();
+      System.out.println("PC: " + pc);
+      System.out.println("JC: " + jc);
+    
+   // Loops until all jobs are finished
+      while (jc != -1) {
          try {
-                    // Executes while jobs are available
+         // Executes while jobs are available
             execute(decode(fetch(pc)));
-                    // Once completed set to status and wait for another process
+         // Once completed set to status and wait for another process
             this.statusOfCPU = CPUStatus.WAITING;
-                    // update process of process?
+            jc--; // Decrement total jobs
          } catch (Exception e) {
-                    // There was an error with try/catch. Update status
+         // There was an error with try/catch. Update status
             this.statusOfCPU = CPUStatus.ERROR;
-                    // Output Exception error
+         // Output Exception error
             System.out.println(e);
          }
       }
